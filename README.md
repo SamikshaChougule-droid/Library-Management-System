@@ -1,64 +1,67 @@
 # Library Management System
 
-## Project Overview
+## Developed By
 
-The Library Management System is a C++ application developed using Object-Oriented Programming (OOP) concepts and file handling. It helps manage library books efficiently by allowing users to add books, search for books, issue books, and return books.
+Samiksha Chougule
+
+## Project Description
+
+The Library Management System is a console-based application developed using C++. The project helps manage library operations such as adding books, searching books, issuing books, and returning books. The application uses file handling to store book records permanently and provides a menu-driven interface for easy navigation.
 
 ## Features
 
-* Add new books to the library.
-* View all available books.
-* Search books by title.
-* Search books by author.
-* Issue books to members.
-* Return issued books.
-* Permanent data storage using file handling.
-* User-friendly menu-driven interface.
+* Add New Books
+* Display All Books
+* Search Books by Title
+* Search Books by Author
+* Issue Books
+* Return Books
+* Persistent Data Storage using File Handling
+* Menu-Driven Interface
 
 ## Technologies Used
 
-* Programming Language: C++
-* Concepts: Classes, Objects, File Handling, Vectors
-* Compiler: GCC / CodeBlocks / Dev-C++ / Visual Studio
+* C++
+* Object-Oriented Programming (OOP)
+* File Handling
+* Functions
+* Vectors
 
-## File Structure
+## Project Structure
 
 LibraryManagementSystem/
 │
-├── main.cpp
+├── library_management.cpp
 ├── books.txt
 ├── README.md
 └── Project_Report.docx
 
 ## How to Run
 
-1. Open the project in any C++ IDE.
-2. Compile the source code.
-3. Run the executable file.
-4. Use the menu options to manage books.
+1. Compile the program:
 
-## Sample Menu
+   g++ library_management.cpp -o library
 
-1. Add Book
-2. View Books
-3. Search Book by Title
-4. Search Book by Author
-5. Issue Book
-6. Return Book
-7. Exit
+2. Run the program:
 
-## Future Enhancements
+   ./library
 
-* Member Management
-* Fine Calculation
-* Book Reservation System
-* Admin Login Authentication
-* Database Integration
+## Concepts Implemented
 
-## Author
+* Classes and Objects
+* File Handling
+* Menu-Driven Programming
+* Search Operations
+* Book Issue and Return Management
 
-Samiksha Chougule
+## Learning Outcomes
+
+* Understanding Object-Oriented Programming
+* Managing records using file handling
+* Implementing search algorithms
+* Handling issue and return operations
+* Developing menu-driven applications
 
 ## Conclusion
 
-This project demonstrates the practical implementation of Object-Oriented Programming and File Handling in C++. It provides an efficient solution for managing library operations.
+This project demonstrates the implementation of a simple Library Management System using C++. It provides an efficient way to manage books and library operations while maintaining persistent records using file handling.
