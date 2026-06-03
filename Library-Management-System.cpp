@@ -6,32 +6,90 @@ Language     : C++
 Concepts Used:
 - Object Oriented Programming
 - File Handling
-- Functions
+- Classes
 - Vectors
 - Menu Driven Programming
 ------------------------------------------
 */
-
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <string>
+#include <iomanip>
 
 using namespace std;
 
-class Book
-{
+class Book {
 public:
     int bookID;
     string title;
     string author;
-    string status;
+    bool issued;
 
-    void input()
-    {
+    Book() {}
+
+    Book(int id, string t, string a, bool isIssued = false) {
+        bookID = id;
+        title = t;
+        author = a;
+        issued = isIssued;
+    }
+};
+
+class Library {
+private:
+    vector<Book> books;
+
+public:
+    void loadBooks() {
+        books.clear();
+
+        ifstream file("books.txt");
+
+        if (!file) {
+            return;
+        }
+
+        string line;
+
+        while (getline(file, line)) {
+            size_t p1 = line.find('|');
+            size_t p2 = line.find('|', p1 + 1);
+            size_t p3 = line.find('|', p2 + 1);
+
+            if (p1 == string::npos || p2 == string::npos || p3 == string::npos)
+                continue;
+
+            int id = stoi(line.substr(0, p1));
+            string title = line.substr(p1 + 1, p2 - p1 - 1);
+            string author = line.substr(p2 + 1, p3 - p2 - 1);
+            bool issued = stoi(line.substr(p3 + 1));
+
+            books.push_back(Book(id, title, author, issued));
+        }
+
+        file.close();
+    }
+
+    void saveBooks() {
+        ofstream file("books.txt");
+
+        for (auto &book : books) {
+            file << book.bookID << "|"
+                 << book.title << "|"
+                 << book.author << "|"
+                 << book.issued << endl;
+        }
+
+        file.close();
+    }
+
+    void addBook() {
+        int id;
+        string title, author;
+
         cout << "\nEnter Book ID: ";
-        cin >> bookID;
-
+        cin >> id;
         cin.ignore();
 
         cout << "Enter Book Title: ";
@@ -40,319 +98,185 @@ public:
         cout << "Enter Author Name: ";
         getline(cin, author);
 
-        status = "Available";
+        books.push_back(Book(id, title, author, false));
+
+        saveBooks();
+
+        cout << "\nBook Added Successfully!\n";
+    }
+
+    void viewBooks() {
+        if (books.empty()) {
+            cout << "\nNo Books Available!\n";
+            return;
+        }
+
+        cout << "\n====================================================================\n";
+        cout << left
+             << setw(10) << "ID"
+             << setw(30) << "Title"
+             << setw(25) << "Author"
+             << setw(10) << "Status" << endl;
+        cout << "====================================================================\n";
+
+        for (auto &book : books) {
+            cout << left
+                 << setw(10) << book.bookID
+                 << setw(30) << book.title
+                 << setw(25) << book.author
+                 << setw(10) << (book.issued ? "Issued" : "Available")
+                 << endl;
+        }
+    }
+
+    void searchByTitle() {
+        string title;
+        cin.ignore();
+
+        cout << "\nEnter Title to Search: ";
+        getline(cin, title);
+
+        bool found = false;
+
+        for (auto &book : books) {
+            if (book.title.find(title) != string::npos) {
+                cout << "\nBook Found\n";
+                cout << "ID: " << book.bookID << endl;
+                cout << "Title: " << book.title << endl;
+                cout << "Author: " << book.author << endl;
+                cout << "Status: "
+                     << (book.issued ? "Issued" : "Available")
+                     << endl;
+
+                found = true;
+            }
+        }
+
+        if (!found)
+            cout << "\nNo Book Found!\n";
+    }
+
+    void searchByAuthor() {
+        string author;
+        cin.ignore();
+
+        cout << "\nEnter Author Name: ";
+        getline(cin, author);
+
+        bool found = false;
+
+        for (auto &book : books) {
+            if (book.author.find(author) != string::npos) {
+                cout << "\nBook Found\n";
+                cout << "ID: " << book.bookID << endl;
+                cout << "Title: " << book.title << endl;
+                cout << "Author: " << book.author << endl;
+                cout << "Status: "
+                     << (book.issued ? "Issued" : "Available")
+                     << endl;
+
+                found = true;
+            }
+        }
+
+        if (!found)
+            cout << "\nNo Book Found!\n";
+    }
+
+    void issueBook() {
+        int id;
+
+        cout << "\nEnter Book ID to Issue: ";
+        cin >> id;
+
+        for (auto &book : books) {
+            if (book.bookID == id) {
+
+                if (book.issued) {
+                    cout << "\nBook Already Issued!\n";
+                    return;
+                }
+
+                book.issued = true;
+
+                saveBooks();
+
+                cout << "\nBook Issued Successfully!\n";
+                return;
+            }
+        }
+
+        cout << "\nBook Not Found!\n";
+    }
+
+    void returnBook() {
+        int id;
+
+        cout << "\nEnter Book ID to Return: ";
+        cin >> id;
+
+        for (auto &book : books) {
+            if (book.bookID == id) {
+
+                if (!book.issued) {
+                    cout << "\nThis Book Was Not Issued!\n";
+                    return;
+                }
+
+                book.issued = false;
+
+                saveBooks();
+
+                cout << "\nBook Returned Successfully!\n";
+                return;
+            }
+        }
+
+        cout << "\nBook Not Found!\n";
     }
 };
 
-string filename = "books.txt";
+int main() {
+    Library library;
+    library.loadBooks();
 
-// Add Book
-void addBook()
-{
-    Book b;
-    b.input();
-
-    ofstream file(filename, ios::app);
-
-    file << b.bookID << "|"
-         << b.title << "|"
-         << b.author << "|"
-         << b.status << endl;
-
-    file.close();
-
-    cout << "\nBook Added Successfully!\n";
-}
-
-// Display Books
-void displayBooks()
-{
-    ifstream file(filename);
-
-    string line;
-
-    cout << "\n===== BOOK RECORDS =====\n";
-
-    while (getline(file, line))
-    {
-        size_t p1 = line.find('|');
-        size_t p2 = line.find('|', p1 + 1);
-        size_t p3 = line.find('|', p2 + 1);
-
-        cout << "\nBook ID : "
-             << line.substr(0, p1);
-
-        cout << "\nTitle   : "
-             << line.substr(p1 + 1, p2 - p1 - 1);
-
-        cout << "\nAuthor  : "
-             << line.substr(p2 + 1, p3 - p2 - 1);
-
-        cout << "\nStatus  : "
-             << line.substr(p3 + 1);
-
-        cout << "\n--------------------------";
-    }
-
-    file.close();
-}
-
-// Search by Title
-void searchByTitle()
-{
-    string searchTitle;
-
-    cin.ignore();
-
-    cout << "\nEnter Title: ";
-    getline(cin, searchTitle);
-
-    ifstream file(filename);
-
-    string line;
-    bool found = false;
-
-    while (getline(file, line))
-    {
-        size_t p1 = line.find('|');
-        size_t p2 = line.find('|', p1 + 1);
-        size_t p3 = line.find('|', p2 + 1);
-
-        string title = line.substr(p1 + 1, p2 - p1 - 1);
-
-        if (title == searchTitle)
-        {
-            cout << "\nBook Found!\n";
-            cout << "\nBook ID : " << line.substr(0, p1);
-            cout << "\nTitle   : " << title;
-            cout << "\nAuthor  : "
-                 << line.substr(p2 + 1, p3 - p2 - 1);
-            cout << "\nStatus  : "
-                 << line.substr(p3 + 1);
-
-            found = true;
-        }
-    }
-
-    if (!found)
-        cout << "\nBook Not Found!\n";
-
-    file.close();
-}
-
-// Search by Author
-void searchByAuthor()
-{
-    string searchAuthor;
-
-    cin.ignore();
-
-    cout << "\nEnter Author Name: ";
-    getline(cin, searchAuthor);
-
-    ifstream file(filename);
-
-    string line;
-    bool found = false;
-
-    while (getline(file, line))
-    {
-        size_t p1 = line.find('|');
-        size_t p2 = line.find('|', p1 + 1);
-        size_t p3 = line.find('|', p2 + 1);
-
-        string author = line.substr(p2 + 1, p3 - p2 - 1);
-
-        if (author == searchAuthor)
-        {
-            cout << "\nBook ID : "
-                 << line.substr(0, p1);
-
-            cout << "\nTitle   : "
-                 << line.substr(p1 + 1, p2 - p1 - 1);
-
-            cout << "\nAuthor  : "
-                 << author;
-
-            cout << "\nStatus  : "
-                 << line.substr(p3 + 1);
-
-            cout << "\n--------------------------";
-
-            found = true;
-        }
-    }
-
-    if (!found)
-        cout << "\nNo Books Found!\n";
-
-    file.close();
-}
-
-// Issue Book
-void issueBook()
-{
-    int id;
-
-    cout << "\nEnter Book ID to Issue: ";
-    cin >> id;
-
-    ifstream file(filename);
-
-    vector<string> records;
-    string line;
-
-    bool found = false;
-
-    while (getline(file, line))
-    {
-        size_t p1 = line.find('|');
-        size_t p2 = line.find('|', p1 + 1);
-        size_t p3 = line.find('|', p2 + 1);
-
-        int bookID = stoi(line.substr(0, p1));
-
-        if (bookID == id)
-        {
-            string title =
-                line.substr(p1 + 1, p2 - p1 - 1);
-
-            string author =
-                line.substr(p2 + 1, p3 - p2 - 1);
-
-            records.push_back(
-                to_string(bookID) + "|" +
-                title + "|" +
-                author + "|Issued");
-
-            found = true;
-        }
-        else
-        {
-            records.push_back(line);
-        }
-    }
-
-    file.close();
-
-    ofstream out(filename);
-
-    for (string record : records)
-    {
-        out << record << endl;
-    }
-
-    out.close();
-
-    if (found)
-        cout << "\nBook Issued Successfully!\n";
-    else
-        cout << "\nBook Not Found!\n";
-}
-
-// Return Book
-void returnBook()
-{
-    int id;
-
-    cout << "\nEnter Book ID to Return: ";
-    cin >> id;
-
-    ifstream file(filename);
-
-    vector<string> records;
-    string line;
-
-    bool found = false;
-
-    while (getline(file, line))
-    {
-        size_t p1 = line.find('|');
-        size_t p2 = line.find('|', p1 + 1);
-        size_t p3 = line.find('|', p2 + 1);
-
-        int bookID = stoi(line.substr(0, p1));
-
-        if (bookID == id)
-        {
-            string title =
-                line.substr(p1 + 1, p2 - p1 - 1);
-
-            string author =
-                line.substr(p2 + 1, p3 - p2 - 1);
-
-            records.push_back(
-                to_string(bookID) + "|" +
-                title + "|" +
-                author + "|Available");
-
-            found = true;
-        }
-        else
-        {
-            records.push_back(line);
-        }
-    }
-
-    file.close();
-
-    ofstream out(filename);
-
-    for (string record : records)
-    {
-        out << record << endl;
-    }
-
-    out.close();
-
-    if (found)
-        cout << "\nBook Returned Successfully!\n";
-    else
-        cout << "\nBook Not Found!\n";
-}
-
-int main()
-{
     int choice;
 
-    do
-    {
-        cout << "\n\n===== LIBRARY MANAGEMENT SYSTEM =====";
-        cout << "\n1. Add Book";
-        cout << "\n2. Display Books";
-        cout << "\n3. Search by Title";
-        cout << "\n4. Search by Author";
-        cout << "\n5. Issue Book";
-        cout << "\n6. Return Book";
-        cout << "\n7. Exit";
-
-        cout << "\nEnter Choice: ";
+    do {
+        cout << "\n\n========== LIBRARY MANAGEMENT SYSTEM ==========\n";
+        cout << "1. Add Book\n";
+        cout << "2. View Books\n";
+        cout << "3. Search Book by Title\n";
+        cout << "4. Search Book by Author\n";
+        cout << "5. Issue Book\n";
+        cout << "6. Return Book\n";
+        cout << "7. Exit\n";
+        cout << "Enter Choice: ";
         cin >> choice;
 
-        switch (choice)
-        {
+        switch (choice) {
         case 1:
-            addBook();
+            library.addBook();
             break;
 
         case 2:
-            displayBooks();
+            library.viewBooks();
             break;
 
         case 3:
-            searchByTitle();
+            library.searchByTitle();
             break;
 
         case 4:
-            searchByAuthor();
+            library.searchByAuthor();
             break;
 
         case 5:
-            issueBook();
+            library.issueBook();
             break;
 
         case 6:
-            returnBook();
+            library.returnBook();
             break;
 
         case 7:
